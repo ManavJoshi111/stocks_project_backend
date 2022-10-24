@@ -1,12 +1,22 @@
 const User = require("../models/userSchema");
+const jwt=require('jsonwebtoken');
 
 exports.loginUser = async (req, res) => {
   console.log(req.body.email, " and ", req.body.password);
   const { email, password } = req.body;
-  const isMatch = await User.findOne({ email: email, password: password });
-  if (isMatch) {
+  const user = await User.findOne({ email: email, password: password });
+  if (user) {
+    const token = user.getJWTToken();
+    const options = {
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+    };
+
     res
       .status(200)
+      .cookie("token", token, options)
       .send({ success: "true", message: "successfully logged in" });
   } else {
     res
@@ -17,7 +27,7 @@ exports.loginUser = async (req, res) => {
 
 //sign up
 exports.registerUser = async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   const { name, email, password } = req.body;
 
   const isMatch = await User.findOne({ email: email });
@@ -26,6 +36,26 @@ exports.registerUser = async (req, res) => {
   } else {
     const user = await User.create({ name, email, password });
     // await user.save();
-    res.status(200).send({ success: "true", user });
+
+    //generating cookie
+    const token = user.getJWTToken();
+    const options = {
+      expires: new Date(
+        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      ),
+      httpOnly: true,
+    };
+
+    res.status(200).cookie("token", token, options).send({ success: "true", user });
   }
+};
+
+//Log out
+exports.logoutUser= async (req, res) => {
+
+  res.cookie("token",null,{
+    expires:new Date(Date.now()),
+    httpOnly:true,
+  })
+  res.status(200).send({ success: "true", "message":"Successfully Logged Out" });
 };

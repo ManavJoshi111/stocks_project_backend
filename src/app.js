@@ -1,4 +1,5 @@
 const express = require("express");
+const dotenv = require("dotenv");
 // const cors = require('cors');
 const app = express();
 // const router = require("./router");
@@ -15,6 +16,10 @@ app.use("/api/v1",user);
 // app.use(express.json({ extended: true }));
 // app.use(router);
 // app.use(schemaFile);
+
+
+//config
+dotenv.config({path:"config/config.env"});
 
 app.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`);
