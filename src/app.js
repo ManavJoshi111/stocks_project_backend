@@ -1,14 +1,15 @@
 const express = require("express");
 const dotenv = require("dotenv");
-// const cors = require('cors');
+const cors = require('cors');
 const app = express();
+app.use(cors());
 // const router = require("./router");
 const PORT = 8000;
 app.use(express.json());
 
 //Route imports
 const user = require('../route/userRoute');
-app.use("/api/v1",user);
+app.use("/api/v1", user);
 
 
 // const schemaFile = require("../models/userSchema");
@@ -19,7 +20,7 @@ app.use("/api/v1",user);
 
 
 //config
-dotenv.config({path:"config/config.env"});
+dotenv.config({ path: "config/config.env" });
 
 app.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`);
