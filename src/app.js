@@ -24,4 +24,14 @@ dotenv.config({ path: "config/config.env" });
 
 app.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`);
-})
+});
+
+// Unhandled Promise Rejection   (for server crashing)
+process.on("unhandledRejection",err=>{
+    console.log(`Error: ${err.message}`);
+    console.log("Shutting down the server due to unhandled promise rejection");
+
+    server.close(()=>{
+        process.exit(1);
+    })
+});
