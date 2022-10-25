@@ -20,18 +20,18 @@ app.use("/api/v1", user);
 
 
 //config
-dotenv.config({ path: "config/config.env" });
+dotenv.config({ path: "./config/config.env" });
 
 app.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`);
 });
 
 // Unhandled Promise Rejection   (for server crashing)
-process.on("unhandledRejection",err=>{
-    console.log(`Error: ${err.message}`);
-    console.log("Shutting down the server due to unhandled promise rejection");
+// process.on("unhandledRejection",err=>{
+//     console.log(`Error: ${err.message}`);
+//     console.log("Shutting down the server due to unhandled promise rejection");
 
-    server.close(()=>{
-        process.exit(1);
-    })
-}); 
+//     server.close(()=>{
+//         process.exit(1);
+//     })
+// }); 
