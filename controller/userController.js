@@ -1,5 +1,5 @@
 const User = require("../models/userSchema");
-const jwt=require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 exports.loginUser = async (req, res) => {
   console.log(req.body.email, " and ", req.body.password);
@@ -13,7 +13,7 @@ exports.loginUser = async (req, res) => {
       ),
       httpOnly: true,
     };
-
+    console.log("Generated token : ", token);
     res
       .status(200)
       .cookie("token", token, options)
@@ -51,11 +51,11 @@ exports.registerUser = async (req, res) => {
 };
 
 //Log out
-exports.logoutUser= async (req, res) => {
+exports.logoutUser = async (req, res) => {
 
-  res.cookie("token",null,{
-    expires:new Date(Date.now()),
-    httpOnly:true,
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
   })
-  res.status(200).send({ success: "true", "message":"Successfully Logged Out" });
+  res.status(200).send({ success: "true", "message": "Successfully Logged Out" });
 };

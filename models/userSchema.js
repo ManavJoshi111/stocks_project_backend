@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require("bcryptjs")
+const jwt = require('jsonwebtoken');
 
 mongoose.connect('mongodb://localhost:27017/stocks_database', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log("Connected to database");
@@ -39,7 +40,13 @@ userSchema.pre("save", async function (next) {
         next();
     }
     this.password = await bcrypt.hash(this.password, 10);
-})
+});
+
+//JWT Token
+userSchema.methods.getJWTToken = function () {
+    return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRE,
+    });
+};
 
 module.exports = mongoose.model("Users", userSchema);
-
