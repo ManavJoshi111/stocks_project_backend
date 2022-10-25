@@ -3,7 +3,8 @@ const User = require("../models/userSchema");
 exports.loginUser = async (req, res) => {
   console.log(req.body.email, " and ", req.body.password);
   const { email, password } = req.body;
-  const user = await User.findOne({ email: email, password: password });
+  
+  const user = await User.findOne({ email: email}).select("+password");
   if (user) {
     const token = user.getJWTToken();
     const options = {
