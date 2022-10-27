@@ -1,8 +1,10 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 const cors = require('cors');
 const app = express();
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+app.use(cookieParser());
 // const router = require("./router");
 const PORT = 8000;
 app.use(express.json());

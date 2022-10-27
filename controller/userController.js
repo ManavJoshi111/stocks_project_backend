@@ -1,4 +1,5 @@
 const User = require("../models/userSchema");
+const jwt = require('jsonwebtoken');
 
 exports.loginUser = async (req, res) => {
   console.log(req.body.email, " and ", req.body.password);
@@ -14,6 +15,7 @@ exports.loginUser = async (req, res) => {
       httpOnly: true,
     };
     console.log("Generated token : ", token);
+    res.cookie("id", user._id);
     res
       .status(200)
       .cookie("token", token, options)
@@ -57,21 +59,19 @@ exports.logoutUser = async (req, res) => {
     expires: new Date(Date.now()),
     httpOnly: true,
   })
-  res.status(200).send({ success: "true", "message": "Successfully Logged Out" });
+  res.status(200).send({ success: "true", message: "Successfully Logged Out" });
 };
 
 // Check if the person is already loggedin or not
 exports.isLoggedIn = async (req, res) => {
-  const email = req.cookies.email;
+  console.log("In is loggedin");
+  const id = req.cookies.id;
   const token = req.cookies.token;
-  if (email && token) {
-    const user = await User.findOne({ email: email });
-    if (user) {
-      res.status(200).send({ success: "true", user });
-    } else {
-      res.status(400).send({ success: "false" });
-    }
-  } else {
-    res.status(400).send({ success: "false" });
+  if (!token) {
+    res.status(200).send({ success: "false", message: "Not logged in" });
+  }
+  else {
+    const user = await User.findById(id);
+    res.status(200).send({ success: "true", message: "Logged in", user });
   }
 }

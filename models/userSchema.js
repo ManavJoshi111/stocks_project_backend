@@ -31,7 +31,15 @@ const userSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now()
-    }
+    },
+    tokens: [
+        {
+            token: {
+                type: String,
+                required: true,
+            },
+        },
+    ],
 });
 
 userSchema.pre("save", async function (next) {
@@ -43,10 +51,19 @@ userSchema.pre("save", async function (next) {
 });
 
 //JWT Token
-userSchema.methods.getJWTToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE,
-    });
+userSchema.methods.getJWTToken = async function () {
+    try {
+        let token = jwt.sign({ id: this._id }, process.env.JWT_SECRET);
+        this.tokens = this.tokens.concat({ token });
+        await this.save();
+        console.log("ID is : ", this._id);
+        // verify if the token is generated or not
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return token;
+    }
+    catch (err) {
+        console.log(err);
+    }
 };
 
 module.exports = mongoose.model("Users", userSchema);
