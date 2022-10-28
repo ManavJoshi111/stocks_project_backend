@@ -15,7 +15,7 @@ exports.loginUser = async (req, res) => {
       httpOnly: true,
     };
     console.log("Generated token : ", token);
-    res.cookie("id", user._id);
+    res.cookie("id", user._id, options);
     res
       .status(200)
       .cookie("token", token, options)
@@ -31,24 +31,54 @@ exports.loginUser = async (req, res) => {
 exports.registerUser = async (req, res) => {
   console.log("Body is : ", req.body);
   const { name, contact, email, password } = req.body;
+  console.log("Contact is : ", contact);
   const isMatch = await User.findOne({ email: email });
   if (isMatch) {
-    res.status(400).send({ success: "false", message: "Email Already Exists" });
+    res.status(400).send({ success: "false", error: "Email Already Exists" });
   } else {
-    const user = await User.create({ name, contact, email, password });
-    // await user.save();
+    try {
+      const user = await User.create({ name, contact, email, password });
+      // await user.save();
+      console.log("User is : ", user);
 
-    //generating cookie
-    console.log("Value which you want is :", process.env.COOKIE_EXPIRE);
-    const token = user.getJWTToken();
-    const options = {
-      expires: new Date(
-        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-    };
-
-    res.status(200).cookie("token", token, options).send({ success: "true", user });
+      //generating cookie
+      console.log("Value which you want is :", process.env.COOKIE_EXPIRE);
+      const token = await user.getJWTToken();
+      console.log("Token is :", token);
+      const options = {
+        expires: new Date(
+          Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+        ),
+        httpOnly: true,
+      };
+      res.cookie("token", token, options);
+      res.cookie("id", user._id, options);
+      res.status(200).send({ success: "true", user });
+    }
+    catch (err) {
+      console.log("Error occuered : ", err);
+      let error = err.errors;
+      for (let i in error) {
+        error = error[i];
+        break;
+      }
+      switch (error.path) {
+        case "name":
+          res.status(400).send({ success: "false", error: error.message });
+          break;
+        case "email":
+          res.status(400).send({ success: "false", error: error.message });
+          break;
+        case "password":
+          res.status(400).send({ success: "false", error: error.message });
+          break;
+        case "contact":
+          res.status(400).send({ success: "false", error: error.message });
+          break;
+        default:
+          res.status(400).send({ success: "false", error: "Something went wrong...\nPlease Try Again After Sometime" });
+      }
+    }
   }
 };
 
@@ -64,7 +94,6 @@ exports.logoutUser = async (req, res) => {
 
 // Check if the person is already loggedin or not
 exports.isLoggedIn = async (req, res) => {
-  console.log("In is loggedin");
   const id = req.cookies.id;
   const token = req.cookies.token;
   if (!token) {

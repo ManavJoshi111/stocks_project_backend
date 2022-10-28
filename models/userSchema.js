@@ -16,9 +16,15 @@ const userSchema = new mongoose.Schema({
         maxLength: [30, "Name cannot exceed 30 characters"],
         minLength: [4, "Name should have more than 4 characters"],
     },
+    contact: {
+        type: Number,
+        required: [true, "Please Enter your contact number"],
+        max: [9999999999, "Contact number cannot exceed 10 digits"],
+        min: [1000000000, "Contact number should have 10 digits"],
+    },
     email: {
         type: String,
-        required: [true, "Please Enter your email address"],
+        required: [true, "Please Enter Your Email Address"],
         unique: true,
         validate: [validator.isEmail, "Please enter a valid email"],
     },
@@ -57,8 +63,6 @@ userSchema.methods.getJWTToken = async function () {
         this.tokens = this.tokens.concat({ token });
         await this.save();
         console.log("ID is : ", this._id);
-        // verify if the token is generated or not
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         return token;
     }
     catch (err) {
