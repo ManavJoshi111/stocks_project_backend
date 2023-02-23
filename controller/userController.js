@@ -1,6 +1,9 @@
 const User = require("../models/userSchema");
 const jwt = require('jsonwebtoken');
 
+exports.loginGet = async (req, res) => {
+  res.send("Login Page");
+};
 exports.loginUser = async (req, res) => {
   console.log(req.body.email, " and ", req.body.password);
   const { email, password } = req.body;
@@ -23,7 +26,7 @@ exports.loginUser = async (req, res) => {
   } else {
     res
       .status(400)
-      .send({ success: "false", message: "Incorrect User Email and Password" });
+      .send({ success: "false", message: "Incorrect User Email or Password" });
   }
 };
 
@@ -57,27 +60,28 @@ exports.registerUser = async (req, res) => {
     }
     catch (err) {
       console.log("Error occuered : ", err);
-      let error = err.errors;
-      for (let i in error) {
-        error = error[i];
-        break;
-      }
-      switch (error.path) {
-        case "name":
-          res.status(400).send({ success: "false", error: error.message });
-          break;
-        case "email":
-          res.status(400).send({ success: "false", error: error.message });
-          break;
-        case "password":
-          res.status(400).send({ success: "false", error: error.message });
-          break;
-        case "contact":
-          res.status(400).send({ success: "false", error: error.message });
-          break;
-        default:
-          res.status(400).send({ success: "false", error: "Something went wrong...\nPlease Try Again After Sometime" });
-      }
+      res.status(400).send({ success: "false", error: err });
+      // let error = err.errors;
+      // for (let i in error) {
+      //   error = error[i];
+      //   break;
+      // }
+      // switch (error.path) {
+      //   case "name":
+      //     res.status(400).send({ success: "false", error: error.message });
+      //     break;
+      //   case "email":
+      //     res.status(400).send({ success: "false", error: error.message });
+      //     break;
+      //   case "password":
+      //     res.status(400).send({ success: "false", error: error.message });
+      //     break;
+      //   case "contact":
+      //     res.status(400).send({ success: "false", error: error.message });
+      //     break;
+      //   default:
+      //     res.status(400).send({ success: "false", error: "Something went wrong...\nPlease Try Again After Sometime" });
+      // }
     }
   }
 };
@@ -85,10 +89,8 @@ exports.registerUser = async (req, res) => {
 //Log out
 exports.logoutUser = async (req, res) => {
 
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
-    httpOnly: true,
-  })
+  res.clearCookie("token", { path: "/" });
+  res.clearCookie("id", { path: "/" });
   res.status(200).send({ success: "true", message: "Successfully Logged Out" });
 };
 

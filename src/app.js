@@ -3,37 +3,17 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
 const app = express();
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
-app.use(cookieParser());
-// const router = require("./router");
-const PORT = 8000;
-app.use(express.json());
 
+dotenv.config({ path: "./config/config.env" });
+app.use(cors({ credentials: true, origin: process.env.HOST }));
+app.use(cookieParser());
+const PORT = process.env.PORT;
+app.use(express.json());
 //Route imports
 const user = require('../route/userRoute');
-app.use("/api/v1", user);
-
-
-// const schemaFile = require("../models/userSchema");
-// app.use(cors());
-// app.use(express.json({ extended: true }));
-// app.use(router);
-// app.use(schemaFile);
-
-
-//config
+app.use("", user);
 dotenv.config({ path: "./config/config.env" });
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT, () => {
     console.log(`Server is started on port ${PORT}`);
 });
-
-// Unhandled Promise Rejection   (for server crashing)
-// process.on("unhandledRejection",err=>{
-//     console.log(`Error: ${err.message}`);
-//     console.log("Shutting down the server due to unhandled promise rejection");
-
-//     server.close(()=>{
-//         process.exit(1);
-//     })
-// }); 

@@ -10,7 +10,7 @@ const authenticate = async (req, res, next) => {
     else {
         try {
             const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
-            const crrUser = await User.findOne({ _id: verifyToken._id, "tokens.token": token });
+            const crrUser = await User.findOne({ _id: verifyToken._id });
             if (!crrUser) {
                 res.status(401).send({ success: "false", error: "Unauthorized Request" });
             }

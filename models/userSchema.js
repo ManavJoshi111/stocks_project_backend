@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 mongoose.connect('mongodb://localhost:27017/stocks_database', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log("Connected to database");
 }).catch((err) => {
-    console.log("Error is : ", err);
+    console.log("Error in connecting to the database : ", err);
 });
 
 const userSchema = new mongoose.Schema({
@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now()
+    },
+    budget: {
+        type: Number,
+        default: 1000000
     },
     tokens: [
         {

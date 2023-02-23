@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, loginUser, logoutUser, isLoggedIn } = require('../controller/userController');
-
+const { registerUser, loginUser, logoutUser, isLoggedIn, loginGet } = require('../controller/userController');
+const { purchase, sell } = require('../controller/trade');
 router.route("/signup").post(registerUser);
 router.route("/login").post(loginUser);
+router.route("/login").get(loginGet);
 router.route("/logout").post(logoutUser);
 router.route("/isLoggedIn").post(isLoggedIn);
-
+router.route("/purchase").post(purchase);
+router.route("/sell").post(sell);
 module.exports = router;
