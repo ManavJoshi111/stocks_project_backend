@@ -1,6 +1,7 @@
 const User = require("../models/userSchema");
+const passport = require('passport');
 const jwt = require('jsonwebtoken');
-
+require('../controller/googleAuth');
 exports.loginGet = async (req, res) => {
   res.send("Login Page");
 };
@@ -22,12 +23,35 @@ exports.loginUser = async (req, res) => {
     res
       .status(200)
       .cookie("token", token, options)
-      .send({ success: "true", message: "successfully logged in", user });
+      .send({ success: "true", message: "Successfully logged in", user });
   } else {
     res
       .status(400)
       .send({ success: "false", message: "Incorrect User Email or Password" });
   }
+};
+
+// Login with google
+exports.googleLogin = (req, res) => {
+  console.log("In googlelogin 1");
+  passport.authenticate('google', {
+    scope: ['email', 'profile']
+  })(req, res);
+}
+
+// Callback for google login
+exports.googleLoginCallback = (req, res, next) => {
+  passport.authenticate('google', {
+    failureRedirect: 'http://localhost:3000/login',
+    successRedirect: 'http://localhost:3000/'
+  },
+    ((err, user, info, status) => {
+      console.log("In googlelogin callback");
+      if (err) { return next(err) }
+      if (!user) { return res.redirect('http://localhost:3000/login') }
+      res.status(200).send({ success: "true", message: "Successfully logged in", user: user });
+    }))(req, res, next);
+  console.log("In googlelogin callback");
 };
 
 //sign up

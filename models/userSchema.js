@@ -12,25 +12,25 @@ mongoose.connect('mongodb://localhost:27017/stocks_database', { useNewUrlParser:
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, "Please Enter your name"],
         maxLength: [30, "Name cannot exceed 30 characters"],
         minLength: [4, "Name should have more than 4 characters"],
     },
+    googleId: {
+        type: String,
+        default: null
+    },
     contact: {
         type: Number,
-        required: [true, "Please Enter your contact number"],
         max: [9999999999, "Contact number cannot exceed 10 digits"],
         min: [1000000000, "Contact number should have 10 digits"],
     },
     email: {
         type: String,
-        required: [true, "Please Enter Your Email Address"],
         unique: true,
         validate: [validator.isEmail, "Please enter a valid email"],
     },
     password: {
         type: String,
-        required: [true, "Please Enter your Password"],
         minLength: [8, "Password should be greater than or equal to 8 characters"],
         select: false,
     },
@@ -73,5 +73,6 @@ userSchema.methods.getJWTToken = async function () {
         console.log(err);
     }
 };
+
 
 module.exports = mongoose.model("Users", userSchema);

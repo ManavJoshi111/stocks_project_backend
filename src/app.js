@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
+const session = require("express-session");
 const app = express();
 
 dotenv.config({ path: "./config/config.env" });
@@ -9,6 +10,8 @@ app.use(cors({ credentials: true, origin: process.env.HOST }));
 app.use(cookieParser());
 const PORT = process.env.PORT;
 app.use(express.json());
+app.use(session({ secret: "thisismysecretkey" }));
+
 //Route imports
 const user = require('../route/userRoute');
 app.use("", user);
