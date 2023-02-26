@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, loginUser, googleLogin, logoutUser, isLoggedIn, loginGet, googleLoginCallback } = require('../controller/userController');
+const { registerUser, loginUser, logoutUser, isLoggedIn, loginGet, googleLogin, googleLoginCallback } = require('../controller/userController');
 const { purchase, sell } = require('../controller/trade');
 router.route("/signup").post(registerUser);
 router.route("/login").post(loginUser);

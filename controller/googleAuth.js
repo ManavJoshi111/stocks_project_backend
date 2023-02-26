@@ -10,7 +10,6 @@ passport.use(new GoogleStrategy({
 },
     function (request, accessToken, refreshToken, profile, done) {
         // Find or Create user here
-        console.log("In passport.use 2");
         User.findOne({ email: profile.email }).then((currentUser) => {
             if (currentUser) {
                 // already have this user
@@ -32,11 +31,11 @@ passport.use(new GoogleStrategy({
 ));
 
 passport.serializeUser(function (user, done) {
-    console.log("SerializeUser 3 ", user);
-    done(null, user);
+    done(null, user.id);
 });
 
-passport.deserializeUser(function (user, done) {
-    console.log("DeSerializeUser");
-    done(null, user);
+passport.deserializeUser(function (id, done) {
+    User.findById(id, function (err, user) {
+        done(err, user);
+    });
 });

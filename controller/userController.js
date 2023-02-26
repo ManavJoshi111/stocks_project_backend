@@ -7,6 +7,10 @@ exports.loginGet = async (req, res) => {
 };
 exports.loginUser = async (req, res) => {
   console.log(req.body.email, " and ", req.body.password);
+  console.log(req.body);
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send({ success: "false", message: "Please fill all the fields" });
+  }
   const { email, password } = req.body;
 
   const user = await User.findOne({ email: email }).select("+password");
@@ -41,18 +45,44 @@ exports.googleLogin = (req, res) => {
 
 // Callback for google login
 exports.googleLoginCallback = (req, res, next) => {
-  passport.authenticate('google', {
-    failureRedirect: 'http://localhost:3000/login',
-    successRedirect: 'http://localhost:3000/'
-  },
-    ((err, user, info, status) => {
-      console.log("In googlelogin callback");
-      if (err) { return next(err) }
-      if (!user) { return res.redirect('http://localhost:3000/login') }
-      res.status(200).send({ success: "true", message: "Successfully logged in", user: user });
-    }))(req, res, next);
-  console.log("In googlelogin callback");
+  passport.authenticate('google', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.redirect('/login');
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      console.log("User authenticated:", req.user);
+      res.redirect('http://localhost:3000/');
+    });
+  })(req, res, next);
 };
+
+
+// exports.googleLoginCallback = (req, res, next) => {
+//   passport.authenticate('google')(req, res, next);
+//   console.log("In googlelogin callback", req.user);
+//   res.redirect('http://localhost:3000/');
+// };
+
+
+// exports.googleLoginCallback = (req, res, next) => {
+//   passport.authenticate('google', {
+//     failureRedirect: 'http://localhost:3000/login',
+//     successRedirect: 'http://localhost:3000/'
+//   })(req, res, next);
+//   //   ((err, user, info, status) => {
+//   //     console.log("In googlelogin callback");
+//   //     if (err) { return next(err) }
+//   //     if (!user) { return res.redirect('http://localhost:3000/login') }
+//   //     res.status(200).send({ success: "true", message: "Successfully logged in", user: user });
+//   //   }))(req, res, next);
+//   // console.log("In googlelogin callback");
+// };
 
 //sign up
 exports.registerUser = async (req, res) => {
@@ -112,18 +142,39 @@ exports.registerUser = async (req, res) => {
 
 //Log out
 exports.logoutUser = async (req, res) => {
-
-  res.clearCookie("token", { path: "/" });
-  res.clearCookie("id", { path: "/" });
-  res.status(200).send({ success: "true", message: "Successfully Logged Out" });
+  console.log("In logout");
+  res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.set('Access-Control-Allow-Credentials', 'true');
+  if (req.user) {
+    console.log("In logout if", req.user);
+    req.logout((err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send({ success: "false", message: "Unable to logout user" });
+      }
+      return res.status(200).send({ success: "true", message: "Successfully Logged Out" });
+    });
+    return;
+  } else {
+    res.clearCookie("token", { path: "/" });
+    res.clearCookie("id", { path: "/" });
+    res.status(200).send({ success: "true", message: "Successfully Logged Out" });
+  }
+  console.log("At end");
 };
+
 
 // Check if the person is already loggedin or not
 exports.isLoggedIn = async (req, res) => {
+  // if the user is logged in using google oauth
+  console.log("req.user is : ", req.user);
+  if (req.user) {
+    return res.send({ success: "true", message: "Logged in", user: req.user });
+  }
   const id = req.cookies.id;
   const token = req.cookies.token;
   if (!token) {
-    res.status(200).send({ success: "false", message: "Not logged in" });
+    res.status(200).send({ success: "false", message: "Not logged in", user: req.user });
   }
   else {
     const user = await User.findById(id);
