@@ -3,6 +3,7 @@ const Trade = require('../models/tradeSchema');
 
 exports.purchase = async (req, res) => {
     const { uid, cryptoId, price, quantity } = req.body;
+    console.log("in purchase : ", uid, cryptoId, price, quantity);
     const user = await User.findOne({ _id: uid });
     if (user) {
         console.log("id : ", uid);
@@ -61,7 +62,15 @@ exports.sell = async (req, res) => {
                 if (quantity == 0) return;
             }
         });
-        User.updateOne({ _id: uid }, { budget: user.budget + (price * quantity) });
-        res.status(200).send("Sold Successfully");
+        User.updateOne({ _id: uid }, { $inc: { budget: price * quantity } }, function (err, result) {
+            if (err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                res.status(200).send("Purchase Successful");
+                console.log(result);
+            }
+        });
     }
 }
