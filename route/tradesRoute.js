@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authenticate = require("../middlewares/authenticate");
-const { buy, sell, allTrades, holdingQty } = require('../controller/trade');
+const { buy, sell, allTrades, holdingQty, tradeInfo } = require('../controller/trade');
 
 // secure routes , authentication required
 router.route("/buy").post(authenticate, buy);
