@@ -15,7 +15,7 @@ exports.loginUser = async (req, res) => {
 
   const user = await User.findOne({ email: email }).select("+password");
   if (user) {
-    const token = user.getJWTToken();
+    const token = await user.getJWTToken();
     const options = {
       expires: new Date(
         Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000

@@ -14,10 +14,21 @@ app.use(cookieParser());
 const PORT = process.env.PORT;
 app.use(express.json());
 
+
+//to check whether server running or not
+
+app.get("/", (req, res) => {
+
+    res.status(200).json({ msg: "server is up........" })
+
+});
+
 //Route imports
 const user = require('../route/userRoute');
 app.use("", user);
-dotenv.config({ path: "./config/config.env" });
+
+const trades = require('../route/tradesRoute');
+app.use('', trades);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is started on port ${PORT}`);

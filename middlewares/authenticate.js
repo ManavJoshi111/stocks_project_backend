@@ -3,16 +3,18 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const authenticate = async (req, res, next) => {
-    const token = req.cookies.jwToken;
+    const token = req.cookies.token;
+
     if (!token) {
-        res.status(401).send({ success: "false", error: "You are not LoggedIn, Please Login First" });
+        return res.status(401).send({ success: "false", error: "You are not LoggedIn, Please Login First" });
     }
     else {
         try {
-            const verifyToken = jwt.verify(token, process.env.SECRET_KEY);
-            const crrUser = await User.findOne({ _id: verifyToken._id });
+            const verifyToken = jwt.verify(token, process.env.JWT_SECRET);
+            const crrUser = await User.findOne({ _id: verifyToken.id });
+
             if (!crrUser) {
-                res.status(401).send({ success: "false", error: "Unauthorized Request" });
+                return res.status(401).send({ success: "false", error: "Unauthorized Request" });
             }
             req.token = token;
             req.crrUser = crrUser;
@@ -20,7 +22,7 @@ const authenticate = async (req, res, next) => {
             next();
         }
         catch (err) {
-            res.status(401).send({ success: "false", error: "You are not LoggedIn, Please Login First" });
+            return res.status(401).send({ success: "false", error: "You are not LoggedIn, Please Login First..." });
         }
     }
 }

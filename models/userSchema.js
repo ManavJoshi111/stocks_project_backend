@@ -42,14 +42,10 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 1000000
     },
-    tokens: [
-        {
-            token: {
-                type: String,
-                required: true,
-            },
-        },
-    ],
+    profit: {
+        type: Number,
+        default: 0
+    }
 });
 
 userSchema.pre("save", async function (next) {
@@ -64,9 +60,9 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.getJWTToken = async function () {
     try {
         let token = jwt.sign({ id: this._id }, process.env.JWT_SECRET);
-        this.tokens = this.tokens.concat({ token });
-        await this.save();
-        console.log("ID is : ", this._id);
+        // this.tokens = this.tokens.concat({ token });
+        // await this.save();
+        // console.log("ID is : ", this._id);
         return token;
     }
     catch (err) {
