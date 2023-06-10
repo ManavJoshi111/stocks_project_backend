@@ -77,26 +77,6 @@ exports.sell = async (req, res) => {
     try {
         const user = await User.findOne({ _id: uid });
         if (user) {
-            // const trades = await Trade.find({ userId: uid, cryptoId: cryptoId });
-            // console.log(trades);
-            // Check if user has suitable shares
-
-            // let sold = false;
-            // trades.forEach((trade) => {
-            //     if (!trade.sold) {
-            //         console.log(trade);
-            //         if (trade.remaining_quantity >= quantity) {
-            //             console.log("In if");
-            //             Trade.updateOne({ _id: trade._id }, { $set: { remaining_quantity: 0, sold: true } }, (err, result) => {
-            //                 if (err) { console.log(err); } else { console.log(result); }
-            //             });
-            //             quantity -= trade.remaining_quantity;
-            //         }
-            //         if (quantity == 0) return;
-            //     }
-            // });
-
-
 
             try {
                 const result = await Trade.aggregate([
@@ -241,7 +221,7 @@ exports.holdingQty = async (req, res) => {
 
     const cryptoId = req.params['id'];
 
-    console.log("uid in holdingQty : " + uid + " " + Symbol);
+    console.log("uid in holdingQty : " + uid + " " + cryptoId);
     try {
 
         const holdingQty = await Trade.aggregate([
@@ -289,9 +269,47 @@ exports.dashboardData = async (req, res) => {
     const uid = req.userId;
 
     try {
-        const trades = await Trade.find({ userId: uid }).select(
-            "-userId -__v"
-        );
+        const data = await Trade.aggregate([
+            {
+                $match: {
+                    userId: uid.toString()
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        cryptoSymbol: "$cryptoSymbol",
+                        type: "$type"
+                    },
+                    totalQuantity: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$type", "buy"] },
+                                "$quantity",
+                                { $multiply: ["$quantity", -1] }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id.cryptoSymbol",
+                    totalHoldingQty: {
+                        $sum: "$totalQuantity"
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    cryptoSymbol: "$_id",
+                    totalHoldingQty: 1
+                }
+            }
+        ]);
+
+
         return res.status(200).json(trades);
     } catch (error) {
         console.error(error);
