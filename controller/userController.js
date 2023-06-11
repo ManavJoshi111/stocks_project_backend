@@ -6,32 +6,28 @@ exports.loginGet = async (req, res) => {
   res.send("Login Page");
 };
 exports.loginUser = async (req, res) => {
-  console.log(req.body.email, " and ", req.body.password);
-  console.log(req.body);
-  if (!req.body.email || !req.body.password) {
-    return res.status(400).send({ success: "false", message: "Please fill all the fields" });
-  }
+  console.log("in login: ", req.body);
   const { email, password } = req.body;
-
-  const user = await User.findOne({ email: email }).select("+password");
+  if (!email || !password) {
+    return res.status(400).json({ error: "Please fill all the fields" });
+  }
+  const user = await User.findOne({ email: email, password: password });
+  console.log("user ; ", user);
   if (user) {
-    const token = await user.getJWTToken();
-    const options = {
-      expires: new Date(
-        Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-    };
-    console.log("Generated token : ", token);
-    res.cookie("id", user._id, options);
-    res
-      .status(200)
-      .cookie("token", token, options)
-      .send({ success: "true", message: "Successfully logged in", user });
-  } else {
-    res
-      .status(400)
-      .send({ success: "false", message: "Incorrect User Email or Password" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {});
+    res.cookie("id", user._id);
+    res.cookie("token", token);
+    res.status(200).json({ message: "Login Successful" });
+  }
+  else {
+    const googleUser = await User.findOne({ email: email });
+    console.log("Google user : ", googleUser);
+    if (googleUser.googleId) {
+      return res.status(400).json({ success: "false", error: "Please Login with Google" });
+    }
+    else {
+      return res.status(400).json({ success: "false", error: "Invalid Credentials" });
+    }
   }
 };
 
@@ -57,32 +53,13 @@ exports.googleLoginCallback = (req, res, next) => {
         return next(err);
       }
       console.log("User authenticated:", req.user);
+      const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {});
+      res.cookie("id", req.user._id);
+      res.cookie("token", token);
       res.redirect('http://localhost:3000/');
     });
   })(req, res, next);
 };
-
-
-// exports.googleLoginCallback = (req, res, next) => {
-//   passport.authenticate('google')(req, res, next);
-//   console.log("In googlelogin callback", req.user);
-//   res.redirect('http://localhost:3000/');
-// };
-
-
-// exports.googleLoginCallback = (req, res, next) => {
-//   passport.authenticate('google', {
-//     failureRedirect: 'http://localhost:3000/login',
-//     successRedirect: 'http://localhost:3000/'
-//   })(req, res, next);
-//   //   ((err, user, info, status) => {
-//   //     console.log("In googlelogin callback");
-//   //     if (err) { return next(err) }
-//   //     if (!user) { return res.redirect('http://localhost:3000/login') }
-//   //     res.status(200).send({ success: "true", message: "Successfully logged in", user: user });
-//   //   }))(req, res, next);
-//   // console.log("In googlelogin callback");
-// };
 
 //sign up
 exports.registerUser = async (req, res) => {
@@ -91,7 +68,13 @@ exports.registerUser = async (req, res) => {
   console.log("Contact is : ", contact);
   const isMatch = await User.findOne({ email: email });
   if (isMatch) {
-    res.status(400).send({ success: "false", error: "Email Already Exists" });
+    // if the user already exisits but looged in using oAuth, means that he will be having google ID but not the password, so if this is the case than we will send an error saying that you have already registered using google, please use that method only
+    if (isMatch.googleId && !isMatch.password) {
+      return res.status(400).send({ success: "false", error: "You have already registered using google, please use that method only" });
+    }
+    else if (isMatch.password) {
+      return res.status(400).send({ success: "false", error: "Email Already Exists" });
+    }
   } else {
     try {
       const user = await User.create({ name, contact, email, password });
@@ -104,7 +87,7 @@ exports.registerUser = async (req, res) => {
       console.log("Token is :", token);
       const options = {
         expires: new Date(
-          Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+          Date.now() + process.env.COOKIE_EXPIRE
         ),
         httpOnly: true,
       };

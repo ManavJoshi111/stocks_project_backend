@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const authenticate = async (req, res, next) => {
+    console.log("In authenticate : ", req.cookies.token);
     const token = req.cookies.token;
 
     if (!token) {
@@ -22,6 +23,7 @@ const authenticate = async (req, res, next) => {
             next();
         }
         catch (err) {
+            console.log("Error ; ", err);
             return res.status(401).send({ success: "false", error: "You are not LoggedIn, Please Login First..." });
         }
     }

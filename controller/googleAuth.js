@@ -14,6 +14,11 @@ passport.use(new GoogleStrategy({
             if (currentUser) {
                 // already have this user
                 // console.log('user is: ', profile);
+                // if we already have a record with the given email id check for googleId, if it is not there insert it
+                if (!currentUser.googleId) {
+                    currentUser.googleId = profile.id;
+                    currentUser.save();
+                }
                 done(null, currentUser);
             } else {
                 // if not, create user in our db
