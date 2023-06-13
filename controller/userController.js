@@ -1,6 +1,7 @@
 const User = require("../models/userSchema");
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+require('dotenv').config({ path: "./config/config.env" });
 require('../controller/googleAuth');
 exports.loginGet = async (req, res) => {
   res.send("Login Page");
@@ -99,7 +100,7 @@ exports.registerUser = async (req, res) => {
 //Log out
 exports.logoutUser = async (req, res) => {
   console.log("In logout");
-  res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.set('Access-Control-Allow-Origin', process.env.HOST);
   res.set('Access-Control-Allow-Credentials', 'true');
   if (req.user) {
     console.log("In logout if", req.user);
