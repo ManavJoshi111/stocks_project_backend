@@ -57,7 +57,7 @@ exports.googleLoginCallback = (req, res, next) => {
       const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
       res.cookie("id", req.user._id, { maxAge: 604800000, httpOnly: true });
       res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
-      res.redirect('http://localhost:3000/');
+      res.redirect(process.env.HOST);
     });
   })(req, res, next);
 };
