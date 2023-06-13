@@ -44,6 +44,10 @@ const userSchema = new mongoose.Schema({
     profit: {
         type: Number,
         default: 0
+    },
+    investment: {
+        type: Number,
+        default: 0
     }
 });
 

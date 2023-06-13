@@ -5,9 +5,6 @@ const mongoose = require("mongoose");
 exports.buy = async (req, res) => {
     const uid = req.userId;
     const { cryptoId, price, quantity } = req.body;
-
-    console.log("in purchase : ", uid, cryptoId, price, quantity);
-
     if (
         cryptoId == null ||
         isNaN(price) ||
@@ -38,7 +35,7 @@ exports.buy = async (req, res) => {
             console.log("Budget : ", user.budget);
             User.updateOne(
                 { _id: uid },
-                { $inc: { budget: -price * quantity } },
+                { $inc: { budget: -price * quantity, investment: price * quantity } },
                 function (err, result) {
                     if (err) {
                         console.log(err);
@@ -61,7 +58,6 @@ exports.sell = async (req, res) => {
 
     const uid = req.userId;
     const { cryptoId, price, quantity } = req.body;
-
     if (
         cryptoId == null ||
         isNaN(price) ||
@@ -162,7 +158,7 @@ exports.sell = async (req, res) => {
 
                         User.updateOne(
                             { _id: uid },
-                            { $inc: { budget: price * quantity } },
+                            { $inc: { budget: price * quantity, investment: -price * quantity } },
                             function (err, result) {
                                 if (err) {
                                     console.log(err);
@@ -202,17 +198,44 @@ exports.sell = async (req, res) => {
 
 exports.allTrades = async (req, res) => {
     const uid = req.userId;
-
     console.log("inside all trades route....");
-
-    try {
-        const trades = await Trade.find({ userId: req.userId }).select(
-            "-userId -__v"
-        );
-        return res.status(200).json(trades);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Internal Server Error" });
+    const buyChecked = req.query.buyChecked;
+    const sellChecked = req.query.sellChecked;
+    console.log("buyChecked : " + buyChecked);
+    console.log("sellChecked : " + sellChecked);
+    if (buyChecked === 'true' && sellChecked === 'false') {
+        try {
+            const trades = await Trade.find({ userId: uid, type: "buy" }).select(
+                "-userId -__v"
+            );
+            res.send(trades);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+    }
+    else if (buyChecked === 'false' && sellChecked === 'true') {
+        try {
+            const trades = await Trade.find({ userId: uid, type: "sell" }).select(
+                "-userId -__v"
+            );
+            res.send(trades);
+        }
+        catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+    }
+    else {
+        try {
+            const trades = await Trade.find({ userId: req.userId }).select(
+                "-userId -__v"
+            );
+            res.send(trades);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
     }
 };
 

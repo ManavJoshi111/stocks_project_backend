@@ -14,9 +14,9 @@ exports.loginUser = async (req, res) => {
   const user = await User.findOne({ email: email, password: password });
   console.log("user ; ", user);
   if (user) {
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {});
-    res.cookie("id", user._id);
-    res.cookie("token", token);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
+    res.cookie("id", user._id, { maxAge: 604800000, httpOnly: true });
+    res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
     res.status(200).json({ message: "Login Successful" });
   }
   else {
@@ -53,9 +53,9 @@ exports.googleLoginCallback = (req, res, next) => {
         return next(err);
       }
       console.log("User authenticated:", req.user);
-      const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {});
-      res.cookie("id", req.user._id);
-      res.cookie("token", token);
+      const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
+      res.cookie("id", req.user._id, { maxAge: 604800000, httpOnly: true });
+      res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
       res.redirect('http://localhost:3000/');
     });
   })(req, res, next);
@@ -85,40 +85,13 @@ exports.registerUser = async (req, res) => {
       console.log("Value which you want is :", process.env.COOKIE_EXPIRE);
       const token = await user.getJWTToken();
       console.log("Token is :", token);
-      const options = {
-        expires: new Date(
-          Date.now() + process.env.COOKIE_EXPIRE
-        ),
-        httpOnly: true,
-      };
-      res.cookie("token", token, options);
-      res.cookie("id", user._id, options);
+      res.cookie("token", token, { maxAge: 604800000, httOnly: true });
+      res.cookie("id", user._id, { maxAge: 604800000, httOnly: true });
       res.status(200).send({ success: "true", user });
     }
     catch (err) {
       console.log("Error occuered : ", err);
       res.status(400).send({ success: "false", error: err });
-      // let error = err.errors;
-      // for (let i in error) {
-      //   error = error[i];
-      //   break;
-      // }
-      // switch (error.path) {
-      //   case "name":
-      //     res.status(400).send({ success: "false", error: error.message });
-      //     break;
-      //   case "email":
-      //     res.status(400).send({ success: "false", error: error.message });
-      //     break;
-      //   case "password":
-      //     res.status(400).send({ success: "false", error: error.message });
-      //     break;
-      //   case "contact":
-      //     res.status(400).send({ success: "false", error: error.message });
-      //     break;
-      //   default:
-      //     res.status(400).send({ success: "false", error: "Something went wrong...\nPlease Try Again After Sometime" });
-      // }
     }
   }
 };
