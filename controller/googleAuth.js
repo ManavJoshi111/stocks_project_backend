@@ -10,6 +10,9 @@ passport.use(new GoogleStrategy({
 },
     function (request, accessToken, refreshToken, profile, done) {
         // Find or Create user here
+        console.log("clientID: ", process.env.GOOGLE_CLIENT_ID);
+        console.log("env variables for debug: ", process.env.HOST);
+        console.log("env variables for debug: ", process.env.BACKEND_HOST);
         User.findOne({ email: profile.email }).then((currentUser) => {
             if (currentUser) {
                 // already have this user
