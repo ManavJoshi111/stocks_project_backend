@@ -3,7 +3,7 @@ const validator = require('validator');
 const bcrypt = require("bcryptjs")
 const jwt = require('jsonwebtoken');
 
-mongoose.connect('mongodb+srv://manavjoshi154:8htdP0DYFSNDQxXF@cluster0.ms5vaiy.mongodb.net/', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log("Connected to database");
 }).catch((err) => {
     console.log("Error in connecting to the database : ", err);
