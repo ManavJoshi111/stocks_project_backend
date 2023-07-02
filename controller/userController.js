@@ -146,8 +146,8 @@ exports.logoutUser = async (req, res) => {
     });
     return;
   } else {
-    res.clearCookie("token", { path: "/" });
-    res.clearCookie("id", { path: "/" });
+    res.clearCookie("token", { path: "/", httpOnly: true, sameSite: "none", secure: "true" });
+    res.clearCookie("id", { path: "/", httpOnly: true, sameSite: "none", secure: "true" });
     res.status(200).send({ success: "true", message: "Successfully Logged Out" });
   }
   console.log("At end");
