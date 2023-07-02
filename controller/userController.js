@@ -24,7 +24,7 @@ exports.loginUser = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
     res.cookie("id", user._id, { maxAge: 604800000, httpOnly: true });
     res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
-    res.status(200).json({ message: "Login Successful" });
+    res.status(200).json({ success: "true", message: "Login Successful" });
   }
   else {
     const googleUser = await User.findOne({ email: email });
