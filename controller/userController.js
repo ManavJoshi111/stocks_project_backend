@@ -1,6 +1,8 @@
 const User = require("../models/userSchema");
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const joi = require('joi');
+const bcrypt = require("bcryptjs");
 require('dotenv').config({ path: "./config/config.env" });
 require('../controller/googleAuth');
 exports.loginGet = async (req, res) => {
@@ -12,9 +14,13 @@ exports.loginUser = async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ error: "Please fill all the fields" });
   }
-  const user = await User.findOne({ email: email, password: password });
+  const user = await User.findOne({ email: email });
   console.log("user ; ", user);
   if (user) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid Credentials" });
+    }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
     res.cookie("id", user._id, { maxAge: 604800000, httpOnly: true });
     res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
@@ -64,6 +70,22 @@ exports.googleLoginCallback = (req, res, next) => {
 
 //sign up
 exports.registerUser = async (req, res) => {
+
+  const schema = joi.object({
+    name: joi.string().required(),
+    contact: joi.string().pattern(/^\d{10}$/).required().messages({
+      'string.pattern.base': 'Phone number must be a 10-digit number',
+      'any.required': 'Phone number is required'
+    }),
+    email: joi.string().email().required(),
+    password: joi.string().min(6).required(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).send({ success: "false", error: error.details[0].message });
+  }
+
   console.log("Body is : ", req.body);
   const { name, contact, email, password } = req.body;
   console.log("Contact is : ", contact);

@@ -12,7 +12,7 @@ exports.buy = async (req, res) => {
         isNaN(quantity) ||
         quantity <= 0
     ) {
-        res.status(400).send("Invalid input format!");
+        res.status(400).send("Invalid input!");
         return;
     }
 
