@@ -10,6 +10,14 @@ exports.loginGet = async (req, res) => {
 };
 exports.loginUser = async (req, res) => {
   console.log("in login: ", req.body);
+  const schema = joi.object({
+    email: joi.string().email().required(),
+    password: joi.string().min(6).required(),
+  });
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).send({ success: "false", error: error.details[0].message });
+  }
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: "Please fill all the fields" });
@@ -24,13 +32,16 @@ exports.loginUser = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
     res.cookie("id", user._id, { maxAge: 604800000, httpOnly: true });
     res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
-    res.status(200).json({ success: "true", message: "Login Successful" });
+    res.status(200).json({ success: "true", message: "Login Successful", user });
   }
   else {
     const googleUser = await User.findOne({ email: email });
+    if (!googleUser) {
+      return res.status(400).json({ success: "false", error: "Invalid Credentials" });
+    }
     console.log("Google user : ", googleUser);
     if (googleUser.googleId) {
-      return res.status(400).json({ success: "false", error: "Please Login with Google" });
+      return res.status(400).json({ success: "false", error: "Please Login with Google", user: googleUser });
     }
     else {
       return res.status(400).json({ success: "false", error: "Invalid Credentials" });
