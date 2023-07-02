@@ -12,7 +12,7 @@ exports.buy = async (req, res) => {
         isNaN(quantity) ||
         quantity <= 0
     ) {
-        res.status(400).send("Invalid input!");
+        res.status(400).json({ err: "Invalid input!" });
         return;
     }
 
@@ -39,7 +39,7 @@ exports.buy = async (req, res) => {
                 function (err, result) {
                     if (err) {
                         console.log(err);
-                        res.status(400).send(err);
+                        res.status(400).json(err);
                     } else {
                         res.status(200).json({ message: "Purchase Successful", tradeInfo: trade });
                         console.log(result);
@@ -47,10 +47,10 @@ exports.buy = async (req, res) => {
                 }
             );
         } else {
-            res.status(400).send("Insufficient Funds");
+            res.status(400).json({ err: "Insufficient Funds" });
         }
     } else {
-        res.status(400).send("User not found");
+        res.status(400).json({ err: "User not found" });
     }
 };
 
@@ -65,7 +65,7 @@ exports.sell = async (req, res) => {
         isNaN(quantity) ||
         quantity <= 0
     ) {
-        return res.status(400).send("Invalid input format!");
+        return res.status(400).json({ err: "Invalid input format!" });
     }
 
     console.log("\ncryotoID : " + cryptoId + "\nprice : " + price + "\nquantity : " + quantity);
@@ -162,7 +162,7 @@ exports.sell = async (req, res) => {
                             function (err, result) {
                                 if (err) {
                                     console.log(err);
-                                    return res.status(400).send(err);
+                                    return res.status(400).json(err);
                                 } else {
                                     // console.log(result);
                                     console.log("Sell trade saved successfully");
@@ -174,25 +174,25 @@ exports.sell = async (req, res) => {
                         console.log("Error saving sell trade:", err);
                         return res
                             .status(500)
-                            .send("Internal server error while saving sell trade...");
+                            .json({ err: "Internal server error while saving sell trade..." });
                     }
                 } else {
                     console.log("Not enough remaining quantity to sell");
-                    return res.status(400).send("Not enough holdings to sell");
+                    return res.status(400).json({ err: "Not enough holdings to sell" });
                 }
             } catch (err) {
                 console.log("Error checking remaining quantity:", err);
                 return res
                     .status(500)
-                    .send("Internal server error while checking quantity...");
+                    .json({ err: "Internal server error while checking quantity..." });
             }
         }
         else {
-            res.status(403).send("unauthorized");
+            res.status(403).json({ err: "unauthorized" });
         }
     } catch (err) {
         console.log("unknown error in sell route :", err);
-        res.status(500).send("Internal server error...");
+        res.status(500).json({ err: "Internal server error..." });
     }
 };
 
