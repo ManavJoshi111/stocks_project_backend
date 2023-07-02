@@ -30,8 +30,8 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
-    res.cookie("id", user._id, { maxAge: 604800000, httpOnly: true });
-    res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
+    res.cookie("id", user._id, { maxAge: 604800000, httpOnly: true, sameSite: "none" });
+    res.cookie("token", token, { maxAge: 604800000, httpOnly: true, sameSite: "none" });
     res.status(200).json({ success: "true", message: "Login Successful", user });
   }
   else {
@@ -72,8 +72,8 @@ exports.googleLoginCallback = (req, res, next) => {
       }
       console.log("User authenticated:", req.user);
       const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
-      res.cookie("id", req.user._id, { maxAge: 604800000, httpOnly: true });
-      res.cookie("token", token, { maxAge: 604800000, httpOnly: true });
+      res.cookie("id", req.user._id, { maxAge: 604800000, httpOnly: true, sameSite: "none" });
+      res.cookie("token", token, { maxAge: 604800000, httpOnly: true, sameSite: "none" });
       res.redirect(process.env.HOST);
     });
   })(req, res, next);
@@ -119,8 +119,8 @@ exports.registerUser = async (req, res) => {
       console.log("Value which you want is :", process.env.COOKIE_EXPIRE);
       const token = await user.getJWTToken();
       console.log("Token is :", token);
-      res.cookie("token", token, { maxAge: 604800000, httOnly: true });
-      res.cookie("id", user._id, { maxAge: 604800000, httOnly: true });
+      res.cookie("token", token, { maxAge: 604800000, httOnly: true, sameSite: "none" });
+      res.cookie("id", user._id, { maxAge: 604800000, httOnly: true, sameSite: "none" });
       res.status(200).send({ success: "true", user });
     }
     catch (err) {
