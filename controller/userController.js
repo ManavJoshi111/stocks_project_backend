@@ -81,7 +81,6 @@ exports.googleLoginCallback = (req, res, next) => {
 
 //sign up
 exports.registerUser = async (req, res) => {
-  console.log("body : ", req.body);
   const schema = joi.object({
     name: joi.string().required(),
     contact: joi.string().pattern(/^\d{10}$/).required().messages({
@@ -90,7 +89,6 @@ exports.registerUser = async (req, res) => {
     }),
     email: joi.string().email().required(),
     password: joi.string().min(8).required(),
-    cpassword: joi.ref('password')
   });
 
   const { error } = schema.validate(req.body);
